@@ -1,5 +1,5 @@
-from django.shortcuts import render, redirect, get_object_or_404, get_list_or_404
-from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from .forms import NewsForm
 from .models import News
 from apps.comment.models import Comment
@@ -8,6 +8,7 @@ from apps.comment.forms import CommentForm
 # Create your views here.
 
 
+@login_required
 def getNews(request):
     if request.method == "POST" and "delete-news" in request.POST:
         user = request.user
@@ -19,6 +20,7 @@ def getNews(request):
     return render(request, "news.html", {"news": news})
 
 
+@login_required
 def detailNews(request, id):
     news = get_object_or_404(News, id=id)
     comments = Comment.objects.filter(news=news)
@@ -28,6 +30,7 @@ def detailNews(request, id):
         "form": CommentForm})
 
 
+@login_required
 def createNews(request):
     if request.method == "POST":
         form = NewsForm(request.POST, request.FILES)
@@ -48,6 +51,7 @@ def createNews(request):
         })
 
 
+@login_required
 def deleteNews(request, id):
     if request.method == "POST":
         user = request.user
@@ -56,13 +60,14 @@ def deleteNews(request, id):
         return redirect("news")
 
 
+@login_required
 def updateNews(request, id):
     news = get_object_or_404(News, id=id)
     form = NewsForm(instance=news)
 
     if request.method == "GET":
         return render(request, "update-news.html", {"form": form})
-    
+
     form = NewsForm(request.POST, request.FILES, instance=news)
     form.save()
     return redirect("detail-news", id)
